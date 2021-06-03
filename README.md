@@ -1,4 +1,10 @@
-## 🪟 Pages, ou "views"
+Projet réaliser pour le partiel de fin de 2e année en developpement web.
+
+Techno utilisé:
+Laravel8, VueJS3 (vuex et vuerouter), Bootstrap.
+
+
+Consigne du projet:
 
 *Vous aurez quatre pages ou "views" à réaliser :* 
 
