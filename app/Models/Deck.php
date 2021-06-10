@@ -8,4 +8,9 @@ use Illuminate\Database\Eloquent\Model;
 class Deck extends Model
 {
     use HasFactory;
+
+    protected $fillable = [
+        'name',
+        'isFavorite',
+    ];
 }

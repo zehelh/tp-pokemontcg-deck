@@ -16,6 +16,7 @@ class CreateCardsTable extends Migration
         Schema::create('cards', function (Blueprint $table) {
             $table->id();
             $table->string('api_id')->unique();
+            $table->string('img');
             $table->timestamps();
             $table->softDeletes();
         });
