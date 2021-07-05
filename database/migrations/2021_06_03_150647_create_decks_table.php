@@ -16,7 +16,6 @@ class CreateDecksTable extends Migration
         Schema::create('decks', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->boolean('isFavorite')->default(0);
             $table->timestamps();
             $table->softDeletes();
         });

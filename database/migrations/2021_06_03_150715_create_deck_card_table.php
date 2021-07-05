@@ -15,7 +15,9 @@ class CreateDeckCardTable extends Migration
     {
         Schema::create('deck_card', function (Blueprint $table) {
             $table->foreignId('deck_id')->constrained();
-            $table->foreignId('card_id')->constrained();
+            $table->string('card_api_id');
+            $table->string('name');
+            $table->integer('quantity');
             $table->timestamps();
             $table->softDeletes();
         });

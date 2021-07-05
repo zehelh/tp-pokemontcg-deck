@@ -17,3 +17,7 @@ use Illuminate\Support\Facades\Route;
 
 
 route::apiResource('deck', DeckController::class);
+
+route::get('deck/{id}/cards', [DeckController::class, 'getCardOfDeck']);
+route::put('deck/{id}/card', [DeckController::class, 'decrementCardOfDeck']);
+route::post('deck/{id}/card', [DeckController::class, 'setCardOfDeck']);
