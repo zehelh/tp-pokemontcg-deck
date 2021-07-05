@@ -16,11 +16,19 @@
 
 <script>
 import Cards from '../components/Cards'
+import { mapActions } from 'vuex'
 
 export default {
   name: 'home',
   components: {
     Cards,
+  },
+  mounted() {
+    this.reset()
+  },
+  methods: {
+    // mapaction
+    ...mapActions('decks', ['reset']),
   }
 }
 </script>

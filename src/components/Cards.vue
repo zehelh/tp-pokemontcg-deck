@@ -7,7 +7,7 @@
     <pagination/>
     <!-- import card composant -->
     <div class="d-flex flex-wrap justify-content-evenly">
-      <card v-for="(item, id) in cards.data" :key="id" :item="item" />
+      <card v-for="(item, id) in cards.data" :key="id" :item="item" @click="addCard({card_id: item.id, card_name: item.name})" />
     </div>
 
     <!-- Pagination -->
@@ -27,6 +27,7 @@ export default {
   name: 'cards',
   data() {
     return {
+      id: this.$route.params.id,
     }
   },
   mounted() {
@@ -46,6 +47,7 @@ export default {
   methods: {
     // mapaction
     ...mapActions('cards', ['getCards']),
+    ...mapActions('decks', ['addCard']),
   }
 }
 </script>

@@ -6,11 +6,10 @@ const cards = {
     return {
       url: 'https://api.pokemontcg.io/v2',
       cards: {},
-      request: '',
+      oldUrl: '',
       types: {},
       collections: {},
       rarities: {},
-      getCardsUrlOld: '',
       filterType: '',
       filterRarity: '',
       filterSet: '',
@@ -41,70 +40,60 @@ const cards = {
       axios.defaults.headers.common = {
         "X-API-Key": "866edf55-e35e-4a94-bcd1-b9dd61e60acd",
       };
-      // On verifie si payload est bien initialisé ou non (par pagination, recherches ou filtres) sinon on l'initialise sans filtres ni recherche a la page 1
+
+      let url = context.state.url + `/cards?page=1&pageSize=10?&q=`
+
+      // On verifie si payload est bien initialisé ou non (par pagination, recherches ou filtres)
       if (payload === undefined) {
-
         payload = {}
-
-        payload.page = 1;
-        context.state.request = context.state.url + `/cards?page=${payload.page}&pageSize=50?&q=`
-
-        context.state.getCardsUrlOld = context.state.request
-
-      }
-
-      if (payload.page) {
-        context.state.request = context.state.request.replace(/page=[0-9]+/, `page=${payload.page}`)
       }
 
       // Initialisation de la recherche
       if (payload.inputValue) {
-        if(context.state.request.includes('name')){
-          context.state.request = context.state.request.replace(/name:\*[a-zA-Z]+\*/, `name:*${payload.inputValue}*`)
-        } else {
-          context.state.request += ` name:*${payload.inputValue}*`
-        }
-      }
-      if(context.state.request.includes('name') && !payload.inputValue) {
-        context.state.request = context.state.request.replace(/name:\*[a-zA-Z]+\*/, '')
+        url += ` name:*${payload.inputValue}*`
       }
 
       // Initialisation des filtres
       if (payload.sortType) {
-        if(context.state.request.includes('types')){
-          context.state.request = context.state.request.replace(/types:[a-zA-Z]+/, `types:${payload.sortType}`)
-        } else {
-          context.state.request += ` types:${payload.sortType}`
-        }
+        url += ` types:${payload.sortType}`
       }
-      if (payload.sortRarity) {
-        if(context.state.request.includes('rarity')){
-          context.state.request = context.state.request.replace(/rarity:\w+(?:\.*\w*)*/, `rarity:${payload.sortRarity.replaceAll(" ", ".")}`)
-          console.log(context.state.request)
-        } else {
-          context.state.request += ` rarity:${payload.sortRarity.replaceAll(" ", ".")}`
-        }
+
+      if (payload.sortRarity) {        
+        url += ` rarity:${payload.sortRarity.replace(/\s+/g, ".")}`
       }
+
       if (payload.sortCollection) {
-        console.log('COLLECTIONS: ' + payload.sortCollection)
-        // context.state.request += `?&q=sets:${payload.sortCollection}`
-        // context.state.request = context.state.url + `/cards&q=sets:base1`
-        if(context.state.request.includes('set')){
-          context.state.request = context.state.request.replace(/set:\w+(?:\.*\w*)*/, `set:${payload.sortCollection.replaceAll(" ", ".")}`)
-          console.log(context.state.request)
-        } else {
-          context.state.request += ` set:${payload.sortCollection.replaceAll(" ", ".")}`
-        }
+        url += ` set.id:${payload.sortCollection}`
       }
 
-      // context.state.getCardsUrlOld = context.state.request
+      // RESET FILTER
+      // Reset de la recherche
+      if(url.includes('name') && !payload.inputValue) {
+        url = url.replace(/name:\*[a-zA-Z]+\*/, '')
+      }
+      // Reset du filtre types
+      if(url.includes('types') && !payload.sortType) {
+        url = url.replace(/types:[a-zA-Z]+/, '')
+      }
+      // Reset du filtre rarity
+      if(url.includes('rarity') && !payload.sortRarity) {
+        url = url.replace(/rarity:[a-zA-Z]+/, '')
+      }
+      // Reset du filtre set
+      if(url.includes('set') && !payload.sortCollection) {
+        url = url.replace(/set.id:[a-zA-Z0-9]+/, '')
+      }
+      
 
-      const response = await axios.get(context.state.request);
+      // Initialisation de la pagination
+      if (payload.page > 1) {
+        url = context.state.oldUrl.replace(/\?page=[0-9]+/, `?page=${payload.page}`)
+      }
+
+      const response = await axios.get(url);
       context.commit('UPDATE_CARDS', response.data);
-
-      console.log('___PAGE___ ' + payload.page)
-      console.log('___URL___  ' + context.state.request)
-      console.log('___DATA___ ' + response.data);
+      // On fais un backup de la request pour pouvoir la garder en mémoire pour agir sur la pagination sans perdre les filtres
+      context.state.oldUrl = url
     },
     // END getCards
 
@@ -146,13 +135,11 @@ const cards = {
 
     // START applyFilter
     applyFilter(context, payload) {
-      console.log(context)
-      console.log(payload)
-      if(payload.context.state.request.includes(payload.name)){
+      if(payload.url.includes(payload.name)){
         let regex = `/ ${payload.name}:[a-zA-Z]+/`
-        payload.context.state.request = payload.context.state.request.replace(regex, ` ${payload.name}:*${payload.value.replaceAll(" ", ".")}*`)
+        payload.url = payload.url.replace(regex, ` ${payload.name}:*${payload.value.replaceAll(" ", ".")}*`)
       } else {
-        payload.context.state.request += ` ${payload.name}:*${payload.value.replaceAll(" ", ".")}*`
+        payload.url += ` ${payload.name}:*${payload.value.replaceAll(" ", ".")}*`
       }
     }
     // END applyFilter

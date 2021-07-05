@@ -9,11 +9,12 @@
       <div class="card-header">
         <h1>Mes decks</h1>
       </div>
-      <div class="card-body d-flex justify-content-evenly">
-        <div v-for="(deck, id) in decks.data" :key="id" class="card col-2">
+      <div class="card-body d-flex justify-content-evenly flex-wrap">
+        <div v-for="(deck, id) in decks.data" :key="id" class="card col-2 m-2 pointer" @click="editDeck(deck.id)">
           <div class="card-body text-center">
-            <p class="h5">{{deck.name}}</p>
-            <p v-if="deck.isFavorite" class="fas fa-star h1 fav"></p>
+            <p class="h4">{{deck.name}}</p>
+            <p v-if="deck.status === 0">Incomplet</p>
+            <p v-else>Complet</p>
           </div>
         </div>
       </div>
@@ -28,6 +29,10 @@ import { mapActions, mapState } from 'vuex'
 
 export default {
   name: 'myDecks',
+  data() {
+    return {
+    }
+  },
   components: {
   },
   mounted() {
@@ -35,11 +40,17 @@ export default {
   },
   computed: {
     // mapstate
-    ...mapState('decks', ['decks']),
+    ...mapState('decks', ['decks', 'cardList']),
+    triggerEmoji() {
+      return this.getEmoji()
+    }
   },
   methods: {
     // mapaction
-    ...mapActions('decks', ['getDecks']),
+    ...mapActions('decks', ['getDecks', 'getCardList']),
+    editDeck(id) {
+      this.$router.push({ path: `/edit-deck/${id}` });
+    },
   }
 }
 </script>
@@ -64,8 +75,8 @@ export default {
       background-color: rgba($color: #ffffff, $alpha: 0.8);
     }
 
-    .fav {
-      color: gold;
+    .pointer {
+      cursor: pointer;
     }
 
   }

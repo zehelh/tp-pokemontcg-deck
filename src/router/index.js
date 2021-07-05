@@ -21,6 +21,12 @@ import CreateDeck from '../views/CreateDeck.vue'
       name: 'createDeck',
       component: CreateDeck
     },
+    {
+      path: '/edit-deck/:id',
+      name: 'editDeck',
+      component: CreateDeck, 
+      props: true
+    },
   ],
   history: createWebHistory(),
   linkActiveClass: 'active'

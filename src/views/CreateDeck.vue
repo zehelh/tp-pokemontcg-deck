@@ -4,38 +4,36 @@
 
     <section class="card card-list col-10 col-md-8 mt-5">
       
-    <div class="col-12">
-    </div>
       <div class="card-header">
-        <h1>Création de deck</h1>
+        <h1>{{ statement }} de deck</h1>
       </div>
       <div class="card-body">
         <div class="d-flex">
           <div class="col-8">
-            <cards v-if="isEditing" />
+            <cards v-if="showCards()" />
           </div>
           <div class="col-4">
-            <div class="col-12 m-2 d-flex">
+            <div class="col-12 my-2 d-flex">
               <p v-if="!isEditing" class="h5 m-1">{{deckTitle}}</p>
               <input v-else class="form-control" v-model="inputTitle" placeholder="Titre du Deck">
-              <div class="btn-group" role="group" aria-label="Basic checkbox toggle button group">
-                <input class="btn-check" id="btncheck1" @click="changeFav">
-                <label v-if="isFav" class="btn btn-outline-primary stars fav" for="btncheck1"><i class="fas fa-star"></i></label>
-                <label v-else class="btn btn-outline-primary stars" for="btncheck1"><i class="fas fa-star"></i></label>
-              </div>
             </div>
             <div class="d-flex justify-content-between align-items-center">
-              <p class="m-0">Total de cartes: </p>
+              <p class="m-0">Total de cartes: {{totalCards()}}</p>
               <button v-if="isEditing"  class="btn btn-primary" @click="stopEdit(inputTitle)">Arêtter la modification</button>
               <button v-else class="btn btn-primary" @click="edit">Modifier le deck</button>
             </div>
             <div class="card mt-5">
-              <div class="card-body">
-                <p>contenu</p>
-                <p>contenu</p>
-                <p>contenu</p>
-                <p>contenu</p>
-                <p>contenu</p>
+              <div class="card-body" v-if="isEditing">
+                <div v-for="(item, id) in cardList" :key="id" @click="decrementCard(item)" class="d-flex justify-content-evenly pointer">
+                  <p>{{item.name}}</p>
+                  <p>x{{item.quantity}}</p>
+                </div>
+              </div>
+              <div class="card-body" v-else>
+                <div v-for="(item, id) in cardList" :key="id" class="d-flex justify-content-evenly">
+                  <p>{{item.name}}</p>
+                  <p>x{{item.quantity}}</p>
+                </div>
               </div>
             </div>
           </div>
@@ -61,13 +59,40 @@ export default {
       inputTitle: '',
     }
   },
+  mounted() {
+    this.getCardList(this.$route.params.id)
+  },
   computed: {
     // mapstate
-    ...mapState('decks', ['isFav', 'isEditing', 'deckTitle']),
+    ...mapState('decks', ['isFav', 'isEditing', 'deckTitle', 'cardList']),
+  },
+  beforeMount() {
+    this.hasData()
   },
   methods: {
     // mapaction
-    ...mapActions('decks', ['createDeck', 'changeFav', 'stopEdit', 'edit']),
+    ...mapActions('decks', ['createDeck', 'changeFav', 'stopEdit', 'edit', 'findDeck', 'reset', 'getCardList', 'decrementCard']),
+    async hasData() {
+      if(this.$route.name == 'editDeck') {
+        this.reset()
+        await this.findDeck(this.$route.params.id)
+        this.inputTitle = this.deckTitle
+        this.statement = 'Modification'
+      } else {
+        this.reset()
+        this.statement = 'Création'
+      }
+    },
+    totalCards() {
+      let tmp = 0
+        for (const key in this.cardList) {
+          tmp += this.cardList[key].quantity
+        }
+      return tmp
+    },
+    showCards() {
+      return this.isEditing && this.$route.name == 'editDeck'
+    }
   }
 }
 </script>
@@ -103,6 +128,10 @@ export default {
 
     .fav {
       color: gold;
+    }
+
+    .pointer {
+      cursor: pointer;
     }
 
   }
